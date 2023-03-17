@@ -25,3 +25,8 @@ C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\obj\Debug\net6.
 C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\obj\Debug\net6.0\HealthyLife.pdb
 C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\obj\Debug\net6.0\HealthyLife.genruntimeconfig.cache
 C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\obj\Debug\net6.0\ref\HealthyLife.dll
+C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\bin\Debug\net6.0\Microsoft.IdentityModel.Abstractions.dll
+C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\bin\Debug\net6.0\Microsoft.IdentityModel.JsonWebTokens.dll
+C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\bin\Debug\net6.0\Microsoft.IdentityModel.Logging.dll
+C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\bin\Debug\net6.0\Microsoft.IdentityModel.Tokens.dll
+C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\bin\Debug\net6.0\System.IdentityModel.Tokens.Jwt.dll
