@@ -1,6 +1,10 @@
 ﻿using HealthyLife.Contexts;
 using HealthyLife.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
 
 namespace HealthyLife.Repositories
 {
@@ -8,17 +12,32 @@ namespace HealthyLife.Repositories
     {
         readonly AuthContext _dbContext;
 
-        public AuthRepository(AuthContext dbContext)
+        private readonly IConfiguration _configuration;
+        public AuthRepository(AuthContext dbContext, IConfiguration configuration)
         {
             _dbContext = dbContext;
+            _configuration = configuration;
         }
 
-
-
-        public void AddUser(User user)
+        public bool CheckUser(string UserName)
+        {
+            return _dbContext.Users.Any(e => e.UserName==UserName);
+        }
+        public bool CheckUser(UserDTO userDTO)
+        {
+            User? user=_dbContext.Users.First(e => e.UserName==userDTO.UserName);  
+            if(user!=null)
+            {
+                return VerifyPasswordHash(userDTO.Password, user.PasswordHash, user.PasswordSalt);
+            }
+            return false;
+        }
+        public void AddUser(UserDTO request)
         {
             try
             {
+                CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+                User user = new User() {UserName=request.UserName, PasswordSalt = passwordSalt,  PasswordHash= passwordHash};
                 _dbContext.Users.Add(user);
                 _dbContext.SaveChanges();
             }
@@ -26,11 +45,6 @@ namespace HealthyLife.Repositories
             {
                 throw;
             }
-        }
-
-        public bool CheckUser(string id)
-        {
-            return _dbContext.Users.Any(e => e.Id == id);
         }
 
         public User DeleteUser(string id)
@@ -86,6 +100,59 @@ namespace HealthyLife.Repositories
             catch
             {
                 throw;
+            }
+        }
+
+
+
+        public bool CheckToken(string value)
+        {
+            return _dbContext.Tokens.Any(e => e.Value==value && e.ExpirationTime>=DateTime.Now);
+        }
+
+
+        public string CreateToken(UserDTO userDTO)
+        {
+            User? user = _dbContext.Users.First(e => e.UserName == userDTO.UserName);
+            if (VerifyPasswordHash(userDTO.Password, user.PasswordHash, user.PasswordSalt))
+            {
+                List<Claim> claims = new List<Claim>()
+                {
+                    new Claim(ClaimTypes.Name, user.UserName)
+                };
+                var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value));
+                var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+                var token = new JwtSecurityToken(
+                    claims: claims,
+                    expires: DateTime.Now.AddDays(1),
+                    signingCredentials: cred);
+
+                var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+                return jwt;
+            }
+            return "error";
+
+        }
+
+
+
+
+        private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            }
+        }
+
+        private bool VerifyPasswordHash(string password, byte[] passwordHash, byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512(passwordSalt))
+            {
+                var computedHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+                return computedHash.SequenceEqual(passwordHash);
             }
         }
     }
