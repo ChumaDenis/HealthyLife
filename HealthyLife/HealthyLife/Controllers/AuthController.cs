@@ -1,5 +1,6 @@
 ﻿using HealthyLife.Models;
 using HealthyLife.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -21,14 +22,16 @@ namespace HealthyLife.Controllers
             _configuration = configuration;
             _authContext = authContext;
         }
+
         [HttpPost("register")]
         public async Task<ActionResult<string>> Register(UserDTO request)
         {
-            if(_authContext.CheckUser(request.UserName))
+            if (!_authContext.CheckUser(request))
             {
                 _authContext.AddUser(request);
-                return Ok("Registration completed!");
+                return Ok("User add");
             }
+            
             return BadRequest("This user is already registered!");
            
         }
@@ -42,12 +45,29 @@ namespace HealthyLife.Controllers
             }
             string token = _authContext.CreateToken(request);
             return Ok(token);
+        }
 
+        [HttpGet("check"), Authorize]
+        public async Task<ActionResult<string>> Ch(UserDTO request)
+        {
+            
+            return Ok("Ok");
         }
 
 
 
-        
+        [HttpPost("change")]
+        public async Task<ActionResult<string>> Change(UserDTO request)
+        {
+            if (!_authContext.CheckUser(request))
+            {
+                return BadRequest("User not found.");
+            }
+            string token = _authContext.CreateToken(request);
+            return Ok(token);
+        }
+
+
 
     }
 }

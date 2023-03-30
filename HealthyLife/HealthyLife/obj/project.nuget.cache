@@ -1,12 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "J3jHmyisyuhuHsUzyKF2iUgNKnQbLEDsbSOBTwVa9PVSANbjQO3kudHjDYYnKzJawChA1mWwHa4uSuAX47KG+Q==",
+  "dgSpecHash": "NSmhvq0+WajK8KtrvfKVo57hwPy38KNAQWDk0QWUBdGvrr104bjaMZwWkIZpUozvLDFDMTvBtiA1ll8zAcSN9g==",
   "success": true,
   "projectFilePath": "C:\\Users\\chumi\\source\\repos\\HealthyLifes\\HealthyLife\\HealthyLife\\HealthyLife.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\chumi\\.nuget\\packages\\azure.core\\1.24.0\\azure.core.1.24.0.nupkg.sha512",
     "C:\\Users\\chumi\\.nuget\\packages\\azure.identity\\1.6.0\\azure.identity.1.6.0.nupkg.sha512",
     "C:\\Users\\chumi\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
+    "C:\\Users\\chumi\\.nuget\\packages\\microsoft.aspnetcore.authentication.jwtbearer\\6.0.15\\microsoft.aspnetcore.authentication.jwtbearer.6.0.15.nupkg.sha512",
     "C:\\Users\\chumi\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\1.1.1\\microsoft.bcl.asyncinterfaces.1.1.1.nupkg.sha512",
     "C:\\Users\\chumi\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
     "C:\\Users\\chumi\\.nuget\\packages\\microsoft.data.sqlclient\\5.0.1\\microsoft.data.sqlclient.5.0.1.nupkg.sha512",

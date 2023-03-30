@@ -14,7 +14,6 @@
 
         public bool CheckUser(UserDTO userDTO);
 
-
         public bool CheckToken(string value);
 
         public string CreateToken(UserDTO userDTO);

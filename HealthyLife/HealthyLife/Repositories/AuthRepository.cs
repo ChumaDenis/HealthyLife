@@ -13,7 +13,7 @@ namespace HealthyLife.Repositories
         readonly AuthContext _dbContext;
 
         private readonly IConfiguration _configuration;
-        public AuthRepository(AuthContext dbContext, IConfiguration configuration)
+        public AuthRepository(IConfiguration configuration, AuthContext dbContext)
         {
             _dbContext = dbContext;
             _configuration = configuration;
@@ -21,23 +21,25 @@ namespace HealthyLife.Repositories
 
         public bool CheckUser(string UserName)
         {
-            return _dbContext.Users.Any(e => e.UserName==UserName);
+            return _dbContext.Users.Any(x=>x.UserName==UserName);
         }
         public bool CheckUser(UserDTO userDTO)
         {
-            User? user=_dbContext.Users.First(e => e.UserName==userDTO.UserName);  
-            if(user!=null)
-            {
+             User? user = _dbContext.Users.FirstOrDefault(e => e.UserEmail == userDTO.UserEmail);
+             if (user != null)
+             {
                 return VerifyPasswordHash(userDTO.Password, user.PasswordHash, user.PasswordSalt);
-            }
-            return false;
+             }
+             return false;
+            
         }
+
         public void AddUser(UserDTO request)
         {
             try
             {
                 CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
-                User user = new User() {UserName=request.UserName, PasswordSalt = passwordSalt,  PasswordHash= passwordHash};
+                User user = new User() {UserName=request.UserName, PasswordSalt = passwordSalt,  PasswordHash= passwordHash, UserEmail=request.UserEmail};
                 _dbContext.Users.Add(user);
                 _dbContext.SaveChanges();
             }
@@ -107,18 +109,18 @@ namespace HealthyLife.Repositories
 
         public bool CheckToken(string value)
         {
-            return _dbContext.Tokens.Any(e => e.Value==value && e.ExpirationTime>=DateTime.Now);
+            return _dbContext.Tokens.Any(e => e.Value==value && e.CreateDate>=DateTime.Now);
         }
 
 
         public string CreateToken(UserDTO userDTO)
         {
-            User? user = _dbContext.Users.First(e => e.UserName == userDTO.UserName);
+            User? user = _dbContext.Users.First(e => e.UserEmail == userDTO.UserEmail);
             if (VerifyPasswordHash(userDTO.Password, user.PasswordHash, user.PasswordSalt))
             {
                 List<Claim> claims = new List<Claim>()
                 {
-                    new Claim(ClaimTypes.Name, user.UserName)
+                    new Claim(ClaimTypes.Email, user.UserEmail)
                 };
                 var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value));
                 var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
@@ -129,10 +131,13 @@ namespace HealthyLife.Repositories
                     signingCredentials: cred);
 
                 var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+                Token token1= new Token() { Value= jwt, UserId=user.Id };
+
+
                 return jwt;
             }
             return "error";
-
         }
 
 

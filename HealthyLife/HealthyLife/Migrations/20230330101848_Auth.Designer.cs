@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthyLife.Migrations
 {
     [DbContext(typeof(AuthContext))]
-    [Migration("20230320151140_Auth")]
+    [Migration("20230330101848_Auth")]
     partial class Auth
     {
         /// <inheritdoc />
@@ -29,9 +29,9 @@ namespace HealthyLife.Migrations
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)")
-                        .HasColumnName("EmployeeID");
+                        .HasColumnName("TokenID");
 
-                    b.Property<DateTime>("ExpirationTime")
+                    b.Property<DateTime>("CreateDate")
                         .IsUnicode(false)
                         .HasColumnType("datetime2");
 
@@ -49,38 +49,40 @@ namespace HealthyLife.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Employee", (string)null);
+                    b.ToTable("Token", (string)null);
                 });
 
             modelBuilder.Entity("HealthyLife.Models.User", b =>
                 {
                     b.Property<string>("Id")
-                        .HasColumnType("nvarchar(max)")
+                        .HasColumnType("nvarchar(450)")
                         .HasColumnName("UserId");
-
-                    b.Property<string>("Mail")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(20)");
 
                     b.Property<byte[]>("PasswordHash")
                         .IsRequired()
-                        .HasMaxLength(50)
+                        .HasMaxLength(64)
                         .IsUnicode(false)
-                        .HasColumnType("varbinary(50)");
+                        .HasColumnType("varbinary(64)");
 
                     b.Property<byte[]>("PasswordSalt")
                         .IsRequired()
-                        .HasMaxLength(50)
+                        .HasMaxLength(128)
                         .IsUnicode(false)
-                        .HasColumnType("varbinary(50)");
+                        .HasColumnType("varbinary(128)");
+
+                    b.Property<string>("UserEmail")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(25)");
 
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
                         .HasColumnType("varchar(20)");
+
+                    b.HasKey("Id");
 
                     b.ToTable("User", (string)null);
                 });
