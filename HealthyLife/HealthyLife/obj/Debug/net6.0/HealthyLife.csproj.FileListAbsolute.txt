@@ -80,3 +80,7 @@ C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\bin\Debug\net6.
 C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\bin\Debug\net6.0\System.Text.Encodings.Web.dll
 C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\bin\Debug\net6.0\System.Text.Json.dll
 C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\bin\Debug\net6.0\runtimes\browser\lib\net6.0\System.Text.Encodings.Web.dll
+C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\bin\Debug\net6.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
+C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\bin\Debug\net6.0\Scrutor.dll
+C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\bin\Debug\net6.0\Swashbuckle.AspNetCore.Filters.dll
+C:\Users\chumi\source\repos\HealthyLifes\HealthyLife\HealthyLife\bin\Debug\net6.0\Swashbuckle.AspNetCore.Filters.Abstractions.dll

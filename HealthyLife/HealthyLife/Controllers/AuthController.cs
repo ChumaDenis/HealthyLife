@@ -48,7 +48,7 @@ namespace HealthyLife.Controllers
         }
 
         [HttpGet("check"), Authorize]
-        public async Task<ActionResult<string>> Ch(UserDTO request)
+        public async Task<ActionResult<string>> Ch()
         {
             
             return Ok("Ok");
