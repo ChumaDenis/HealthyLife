@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HealthyLife.Migrations
 {
     [DbContext(typeof(AuthContext))]
-    [Migration("20230330101848_Auth")]
+    [Migration("20230402171009_Auth")]
     partial class Auth
     {
         /// <inheritdoc />
@@ -25,7 +25,7 @@ namespace HealthyLife.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("HealthyLife.Models.Token", b =>
+            modelBuilder.Entity("HealthyLife.Models.Auth.Token", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)")
@@ -43,20 +43,26 @@ namespace HealthyLife.Migrations
 
                     b.Property<string>("Value")
                         .IsRequired()
-                        .HasMaxLength(100)
+                        .HasMaxLength(128)
                         .IsUnicode(false)
-                        .HasColumnType("varchar(100)");
+                        .HasColumnType("varchar(128)");
 
                     b.HasKey("Id");
 
                     b.ToTable("Token", (string)null);
                 });
 
-            modelBuilder.Entity("HealthyLife.Models.User", b =>
+            modelBuilder.Entity("HealthyLife.Models.Auth.User", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("UserId");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(25)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(25)");
 
                     b.Property<byte[]>("PasswordHash")
                         .IsRequired()
@@ -64,23 +70,35 @@ namespace HealthyLife.Migrations
                         .IsUnicode(false)
                         .HasColumnType("varbinary(64)");
 
+                    b.Property<DateTime?>("PasswordRessetExpires")
+                        .IsUnicode(false)
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("PasswordRessetToken")
+                        .HasMaxLength(128)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(128)");
+
                     b.Property<byte[]>("PasswordSalt")
                         .IsRequired()
                         .HasMaxLength(128)
                         .IsUnicode(false)
                         .HasColumnType("varbinary(128)");
 
-                    b.Property<string>("UserEmail")
-                        .IsRequired()
-                        .HasMaxLength(25)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(25)");
-
                     b.Property<string>("UserName")
                         .IsRequired()
                         .HasMaxLength(20)
                         .IsUnicode(false)
                         .HasColumnType("varchar(20)");
+
+                    b.Property<string>("VerifacationToken")
+                        .HasMaxLength(128)
+                        .IsUnicode(false)
+                        .HasColumnType("varchar(128)");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .IsUnicode(false)
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

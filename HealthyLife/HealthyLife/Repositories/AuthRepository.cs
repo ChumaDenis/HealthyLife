@@ -1,5 +1,5 @@
 ﻿using HealthyLife.Contexts;
-using HealthyLife.Models;
+using HealthyLife.Models.Auth;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -19,27 +19,41 @@ namespace HealthyLife.Repositories
             _configuration = configuration;
         }
 
-        public bool CheckUser(string UserName)
+
+        //
+        public bool CheckUser(string Email)
         {
-            return _dbContext.Users.Any(x=>x.UserName==UserName);
+            return _dbContext.Users.Any(x=>x.Email==Email);
         }
-        public bool CheckUser(UserDTO userDTO)
+        //
+        public bool CheckUser(UserRegisterRequest request)
         {
-             User? user = _dbContext.Users.FirstOrDefault(e => e.UserEmail == userDTO.UserEmail);
+             User? user = _dbContext.Users.FirstOrDefault(e => e.Email == request.Email);
              if (user != null)
              {
-                return VerifyPasswordHash(userDTO.Password, user.PasswordHash, user.PasswordSalt);
+                return VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt);
              }
              return false;
-            
+        }
+        //
+        public bool CheckUser(UserLoginRequest request)
+        {
+            User? user = _dbContext.Users.FirstOrDefault(e => e.Email == request.Email);
+            if (user != null)
+            {
+                return VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt);
+            }
+            return false;
         }
 
-        public void AddUser(UserDTO request)
+        //
+        public void AddUser(UserRegisterRequest request)
         {
             try
             {
                 CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
-                User user = new User() {UserName=request.UserName, PasswordSalt = passwordSalt,  PasswordHash= passwordHash, UserEmail=request.UserEmail};
+                User user = new User() {UserName=request.UserName, PasswordSalt = passwordSalt, 
+                    PasswordHash= passwordHash, Email=request.Email, VerifacationToken= CreateRandomToken()};
                 _dbContext.Users.Add(user);
                 _dbContext.SaveChanges();
             }
@@ -72,37 +86,65 @@ namespace HealthyLife.Repositories
             }
         }
 
-        public User GetUserDetails(string id)
+        public User GetUserDetails(string email)
         {
-            try
+            User? user = _dbContext.Users.FirstOrDefault(x=>x.Email==email);
+            if (user != null)
             {
-                User? user = _dbContext.Users.Find(id);
-                if (user != null)
-                {
-                    return user;
-                }
-                else
-                {
-                    throw new ArgumentNullException();
-                }
+                return user;
             }
-            catch
+            else
             {
-                throw;
+                throw new Exception("User not found!");
             }
         }
 
-        public void UpdateUser(User user)
+        public string PasswordResetAcces(string email)
         {
-            try
+            User user = GetUserDetails(email);
+            user.PasswordRessetToken = CreateRandomToken();
+            user.PasswordRessetExpires = DateTime.Now.AddDays(1);
+            _dbContext.SaveChanges();
+
+            return user.PasswordRessetToken;
+        }
+
+
+
+        public void PasswordReset(ResetPasswordRequest request)
+        {
+            User user = _dbContext.Users.FirstOrDefault(x => x.PasswordRessetToken == request.Token);
+            if(user==null || user.PasswordRessetExpires < DateTime.Now)
             {
-                _dbContext.Entry(user).State = EntityState.Modified;
-                _dbContext.SaveChanges();
+                throw new Exception("Invalid token!");
             }
-            catch
+
+            CreatePasswordHash(request.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            user.PasswordSalt = passwordSalt;
+            user.PasswordHash = passwordHash;
+
+            user.PasswordRessetExpires = null;
+            user.PasswordRessetToken = null;
+
+
+            _dbContext.SaveChanges();
+            
+        }
+
+        public void VerifyUser(string token)
+        {
+            User user = _dbContext.Users.FirstOrDefault(x => x.VerifacationToken == token);
+            if (user == null)
             {
-                throw;
+                throw new Exception("User don`t found!");
             }
+
+            if (user.VerifiedAt != null)
+            {
+                throw new Exception("The user has already been verified!");
+            }
+            user.VerifiedAt = DateTime.Now;
+            _dbContext.SaveChanges();
         }
 
 
@@ -112,15 +154,14 @@ namespace HealthyLife.Repositories
             return _dbContext.Tokens.Any(e => e.Value==value && e.CreateDate>=DateTime.Now);
         }
 
-
-        public string CreateToken(UserDTO userDTO)
+        public string CreateToken(UserLoginRequest request)
         {
-            User? user = _dbContext.Users.First(e => e.UserEmail == userDTO.UserEmail);
-            if (VerifyPasswordHash(userDTO.Password, user.PasswordHash, user.PasswordSalt))
+            User? user = _dbContext.Users.First(e => e.Email == request.Email);
+            if (VerifyPasswordHash(request.Password, user.PasswordHash, user.PasswordSalt))
             {
                 List<Claim> claims = new List<Claim>()
                 {
-                    new Claim(ClaimTypes.Email, user.UserEmail)
+                    new Claim(ClaimTypes.Email, user.Email)
                 };
                 var key = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token").Value));
                 var cred = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
@@ -132,16 +173,19 @@ namespace HealthyLife.Repositories
 
                 var jwt = new JwtSecurityTokenHandler().WriteToken(token);
 
-                Token token1= new Token() { Value= jwt, UserId=user.Id };
-
+                //Token newToken= new Token() { Value= jwt, UserId=user.Id};
+                //_dbContext.Tokens.Add(newToken);
+                //_dbContext.SaveChanges();
 
                 return jwt;
             }
             return "error";
         }
 
-
-
+        private string CreateRandomToken()
+        {
+            return Convert.ToHexString(RandomNumberGenerator.GetBytes(64));
+        }
 
         private void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
@@ -160,5 +204,6 @@ namespace HealthyLife.Repositories
                 return computedHash.SequenceEqual(passwordHash);
             }
         }
+
     }
 }

@@ -1,4 +1,4 @@
-﻿using HealthyLife.Models;
+﻿using HealthyLife.Models.Auth;
 using Microsoft.EntityFrameworkCore;
 
 namespace HealthyLife.Contexts
@@ -20,16 +20,22 @@ namespace HealthyLife.Contexts
                 entity.ToTable("User");
                 entity.Property(e => e.Id).HasColumnName("UserId");
                 entity.Property(e => e.UserName).HasMaxLength(20).IsUnicode(false);
-                entity.Property(e => e.UserEmail).HasMaxLength(25).IsUnicode(false);
+                entity.Property(e => e.Email).HasMaxLength(25).IsUnicode(false);
                 entity.Property(e => e.PasswordSalt).HasMaxLength(128).IsUnicode(false);
                 entity.Property(e => e.PasswordHash).HasMaxLength(64).IsUnicode(false);
+                entity.Property(e => e.VerifacationToken).HasMaxLength(128).IsUnicode(false);
+                entity.Property(e => e.VerifiedAt).IsUnicode(false);
+                entity.Property(e => e.PasswordRessetToken).HasMaxLength(128).IsUnicode(false);
+                entity.Property(e => e.PasswordRessetExpires).IsUnicode(false);
+
+
             });
 
             modelBuilder.Entity<Token>(entity =>
             {
                 entity.ToTable("Token");
                 entity.Property(e => e.Id).HasColumnName("TokenID");
-                entity.Property(e => e.Value).HasMaxLength(100).IsUnicode(false);
+                entity.Property(e => e.Value).HasMaxLength(256).IsUnicode(false);
                 entity.Property(e => e.CreateDate).IsUnicode(false);
                 entity.Property(e => e.UserId).HasMaxLength(256).IsUnicode(false);
             });

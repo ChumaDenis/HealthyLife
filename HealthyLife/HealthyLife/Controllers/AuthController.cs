@@ -1,4 +1,4 @@
-﻿using HealthyLife.Models;
+﻿using HealthyLife.Models.Auth;
 using HealthyLife.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -24,9 +24,9 @@ namespace HealthyLife.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<ActionResult<string>> Register(UserDTO request)
+        public async Task<ActionResult<string>> Register(UserRegisterRequest request)
         {
-            if (!_authContext.CheckUser(request))
+            if (!_authContext.CheckUser(request.Email))
             {
                 _authContext.AddUser(request);
                 return Ok("User add");
@@ -37,14 +37,38 @@ namespace HealthyLife.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<string>> Login(UserDTO request)
+        public async Task<ActionResult<string>> Login(UserLoginRequest request)
         {
-            if (!_authContext.CheckUser(request))
+            try
             {
-                return BadRequest("User not found.");
+                if (!_authContext.CheckUser(request.Email))
+                {
+                    throw new Exception ("User not found.");
+                }
+                string token = _authContext.CreateToken(request);
+                return Ok(token);
             }
-            string token = _authContext.CreateToken(request);
-            return Ok(token);
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
+        }
+
+
+        [HttpPost("verify")]
+        public async Task<ActionResult<string>> VerifyUser(string token)
+        {
+            try
+            {
+                _authContext.VerifyUser(token);
+                return Ok("The user has been successfully verified!");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+
         }
 
         [HttpGet("check"), Authorize]
@@ -54,17 +78,32 @@ namespace HealthyLife.Controllers
             return Ok("Ok");
         }
 
-
-
-        [HttpPost("change")]
-        public async Task<ActionResult<string>> Change(UserDTO request)
+        [HttpPost("forgot-password")]
+        public async Task<ActionResult<string>> ForgotPassword(string email)
         {
-            if (!_authContext.CheckUser(request))
+            try
             {
-                return BadRequest("User not found.");
+                string token = _authContext.PasswordResetAcces(email);
+                return Ok(token);
             }
-            string token = _authContext.CreateToken(request);
-            return Ok(token);
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("change-password")]
+        public async Task<ActionResult<string>> ChangePassword(ResetPasswordRequest request)
+        {
+            try
+            {
+                _authContext.PasswordReset(request);
+                return Ok("The password has been changed");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            };
         }
 
 
